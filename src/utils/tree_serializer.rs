@@ -25,6 +25,7 @@ impl JsonManager {
         Ok(data)
     }
 }
+
 // need module to determine if the json file is valid and in the correct format for this program to read
 pub struct JsonValidator;
 impl JsonValidator {
