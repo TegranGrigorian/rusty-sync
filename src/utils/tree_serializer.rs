@@ -8,6 +8,15 @@ use serde::{Serialize, Deserialize};
 use std::fs::File;
 use std::io::{self, Read};
 
+// definition sof structs for the nodes
+#[derive(Deserialize)]
+pub struct FileNode {
+    pub name: String,
+    pub r#type: String, // "file" or "folder"
+    pub children: Option<Vec<FileNode>>,
+    pub git_remote: Option<String>,
+}
+
 pub struct JsonManager;
 
 impl JsonManager {
@@ -29,11 +38,18 @@ impl JsonManager {
 // need module to determine if the json file is valid and in the correct format for this program to read
 pub struct JsonValidator;
 impl JsonValidator {
-pub fn validate_json_format(path: &str) -> io::Result<bool> {
+    pub fn validate_json_format(path: &str) -> io::Result<bool> {
         let mut file = File::open(path)?;
         let mut content = String::new();
         file.read_to_string(&mut content)?;
-        serde_json::from_str::<serde_json::Value>(&content).map(|_| true).map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "Invalid JSON format"))
+
+        let result: Result<FileNode, serde_json::Error> = serde_json::from_str(&content);
+        match result {
+            Ok(_node) => {
+                // Optionally, add more checks here (e.g., node.type is \"folder\" at root)
+                Ok(true)
+            }
+            Err(_) => Err(io::Error::new(io::ErrorKind::InvalidData, "Invalid JSON format or structure"))
+        }
     }
-    // a place holder for now until a specific format is defined
 }
