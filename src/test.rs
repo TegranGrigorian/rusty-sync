@@ -7,7 +7,12 @@ pub fn test_git_ignore() {
     let test_path = PathBuf::from("/home/tegran-grigorian/Documents");
     git_ignore.find_git_directories(&test_path);
     println!("Ignored .git directories:");
+    // get remotes
+    
     for path in git_ignore.ignored_paths {
-        println!("{}", path.display());
+        let remotes = GitDetector::get_git_remotes(&path);
+        for remote in remotes {
+            println!("Found remote '{}' in {}", remote, path.display());
+        }
     }
 }

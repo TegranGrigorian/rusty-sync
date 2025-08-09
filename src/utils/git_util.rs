@@ -19,6 +19,32 @@ impl GitDetector {
             println!("The directory does not exist: {}", path.display());
         }
     }
+
+    pub fn get_git_remotes(repo_path: &Path) -> Vec<String> {
+        let git_config_path = repo_path.join(".git").join("config");
+        if !git_config_path.exists() {
+            return Vec::new();
+        }
+
+        let content = fs::read_to_string(git_config_path).unwrap_or_else(|_| String::new());
+        let mut urls = Vec::new();
+        let mut in_remote_section = false;
+
+        for line in content.lines() {
+            let line = line.trim();
+            if line.starts_with("[remote") {
+                in_remote_section = true;
+            } else if line.starts_with('[') {
+                in_remote_section = false;
+            } else if in_remote_section && line.starts_with("url =") {
+                if let Some(url) = line.split('=').nth(1) {
+                    urls.push(url.trim().to_string());
+                }
+            }
+        }
+
+        urls
+    }
 }
 // a struct needs to be created that will climb a directroy for all the .git directories and return a vector of paths
 // these paths will be ignored including their contents
