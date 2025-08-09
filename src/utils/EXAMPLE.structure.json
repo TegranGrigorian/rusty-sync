@@ -1,0 +1,74 @@
+{
+  "name": ".",
+  "type": "folder",
+  "children": [
+    { "name": "Cargo.lock", "type": "file" },
+    { "name": "Cargo.toml", "type": "file" },
+    { "name": "docs", "type": "folder", "children": [] },
+    { "name": "hello.txt", "type": "file" },
+    {
+      "name": "src",
+      "type": "folder",
+      "children": [
+        {
+          "name": "cli",
+          "type": "folder",
+          "children": [
+            { "name": "mod.rs", "type": "file" }
+          ]
+        },
+        {
+          "name": "cloud",
+          "type": "folder",
+          "children": [
+            { "name": "mod.rs", "type": "file" }
+          ]
+        },
+        {
+          "name": "config",
+          "type": "folder",
+          "children": [
+            { "name": "mod.rs", "type": "file" }
+          ]
+        },
+        {
+          "name": "core",
+          "type": "folder",
+          "children": [
+            { "name": "mod.rs", "type": "file" }
+          ]
+        },
+        { "name": "lib.rs", "type": "file" },
+        { "name": "main.rs", "type": "file" },
+        { "name": "test.rs", "type": "file" },
+        {
+          "name": "utils",
+          "type": "folder",
+          "children": [
+            { "name": "EXAMPLE.structure.json", "type": "file" },
+            {
+              "name": "file",
+              "type": "folder",
+              "children": [
+                { "name": "manager.rs", "type": "file" },
+                { "name": "mod.rs", "type": "file" }
+              ]
+            },
+            {
+              "name": "folder",
+              "type": "folder",
+              "children": [
+                { "name": "manager.rs", "type": "file" },
+                { "name": "mod.rs", "type": "file" }
+              ]
+            },
+            { "name": "git_util.rs", "type": "file" },
+            { "name": "mod.rs", "type": "file" },
+            { "name": "README.json_format.md", "type": "file" },
+            { "name": "tree_serializer.rs", "type": "file" }
+          ]
+        }
+      ]
+    }
+  ]
+}

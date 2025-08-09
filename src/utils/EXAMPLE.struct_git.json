@@ -1,0 +1,16 @@
+{
+  "name": "quick test",
+  "type": "folder",
+  "children": [
+    {
+      "name": "tiktok-cleaner",
+      "type": "folder",
+      "git_remote": "https://github.com/TegranGrigorian/tiktok-cleaner.git"
+    },
+    {
+      "name": "yt-to-mp3-4",
+      "type": "folder",
+      "git_remote": "git@github.com:TegranGrigorian/yt-to-mp3-4.git"
+    }
+  ]
+}

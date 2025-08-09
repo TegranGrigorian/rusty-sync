@@ -42,7 +42,6 @@ impl GitDetector {
                 }
             }
         }
-
         urls
     }
 }
