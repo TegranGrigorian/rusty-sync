@@ -1,12 +1,107 @@
 {
-  "name": "Projects",
+  "name": "Downloads",
   "type": "folder",
   "children": [
     {
-      "name": "rusty-sync",
-      "type": "folder",
+      "name": "EXAMPLE.struct_git.json",
+      "type": "file",
       "children": null,
-      "git_remote": "https://github.com/TegranGrigorian/rusty-sync"
+      "git_remote": null
+    },
+    {
+      "name": "rat_x86_03082025.deb",
+      "type": "file",
+      "children": null,
+      "git_remote": null
+    },
+    {
+      "name": "yt-to-mp3-4-linux-x86",
+      "type": "folder",
+      "children": [
+        {
+          "name": "bin",
+          "type": "folder",
+          "children": [
+            {
+              "name": "linux",
+              "type": "folder",
+              "children": [
+                {
+                  "name": "ffprobe",
+                  "type": "file",
+                  "children": null,
+                  "git_remote": null
+                },
+                {
+                  "name": "install.sh",
+                  "type": "file",
+                  "children": null,
+                  "git_remote": null
+                },
+                {
+                  "name": "ffmpeg",
+                  "type": "file",
+                  "children": null,
+                  "git_remote": null
+                },
+                {
+                  "name": "yt-dlp",
+                  "type": "file",
+                  "children": null,
+                  "git_remote": null
+                },
+                {
+                  "name": "yt-to-mp3-4",
+                  "type": "file",
+                  "children": null,
+                  "git_remote": null
+                },
+                {
+                  "name": "bin",
+                  "type": "folder",
+                  "children": [
+                    {
+                      "name": "linux",
+                      "type": "folder",
+                      "children": [
+                        {
+                          "name": "ffprobe",
+                          "type": "file",
+                          "children": null,
+                          "git_remote": null
+                        },
+                        {
+                          "name": "ffmpeg",
+                          "type": "file",
+                          "children": null,
+                          "git_remote": null
+                        },
+                        {
+                          "name": "yt-dlp",
+                          "type": "file",
+                          "children": null,
+                          "git_remote": null
+                        }
+                      ],
+                      "git_remote": null
+                    }
+                  ],
+                  "git_remote": null
+                }
+              ],
+              "git_remote": null
+            }
+          ],
+          "git_remote": null
+        }
+      ],
+      "git_remote": null
+    },
+    {
+      "name": "yt-to-mp3-4-linux-x86.tar.gz",
+      "type": "file",
+      "children": null,
+      "git_remote": null
     }
   ],
   "git_remote": null

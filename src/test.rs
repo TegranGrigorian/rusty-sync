@@ -1,4 +1,4 @@
-use rusty_sync::utils::folder;
+// use rusty_sync::utils::folder;
 use rusty_sync::utils::git_util::GitIgnore;
 use rusty_sync::utils::git_util::GitDetector;
 use rusty_sync::utils::tree_serializer;
@@ -43,7 +43,8 @@ pub fn test_tree_gen() {
 }
 
 pub fn test_tree_gen_to_json(save_in_target: bool) {
-    let folder_path = "/home/tegran-grigorian/Documents/Projects"; // /rusty-syncs
+    // let folder_path = "/home/tegran-grigorian/Documents/Projects"; // /rusty-syncs
+    let folder_path = "/home/tegran-grigorian/Downloads";
     match tree_serializer::ReadFileTree::generate_tree(folder_path) {
         Ok(file_tree) => {
             let json_path = if save_in_target {
