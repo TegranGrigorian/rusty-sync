@@ -32,4 +32,16 @@ impl FileManager {
         }
         Ok(())
     }
+
+    pub fn get_file_metadata(path: &str) -> io::Result<(String, String)> {
+        let metadata = fs::metadata(path)?;
+        let file_type = if metadata.is_file() {
+            "file"
+        } else if metadata.is_dir() {
+            "folder"
+        } else {
+            "unknown"
+        };
+        Ok((path.to_string(), file_type.to_string()))
+    }
 }

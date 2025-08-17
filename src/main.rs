@@ -15,11 +15,12 @@ fn main() {
     // }
 
     //test git detector
-    if GitDetector::is_git_repository(Path::new(folder_path)) {
-        println!("The directory is a git repository");
-    } else {
-        println!("The directory is not a git repository");
-    }
+    // if GitDetector::is_git_repository(Path::new(folder_path)) {
+    //     println!("The directory is a git repository");
+    // } else {
+    //     println!("The directory is not a git repository");
+    // }
 
-    test::test_json_structure();
+    // test::test_json_structure();
+    test::test_tree_gen_to_json(false);
 }

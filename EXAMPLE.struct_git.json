@@ -1,0 +1,13 @@
+{
+  "name": "Projects",
+  "type": "folder",
+  "children": [
+    {
+      "name": "rusty-sync",
+      "type": "folder",
+      "children": null,
+      "git_remote": "https://github.com/TegranGrigorian/rusty-sync"
+    }
+  ],
+  "git_remote": null
+}
