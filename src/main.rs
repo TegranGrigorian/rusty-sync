@@ -19,4 +19,5 @@ fn main() {
 
     // test::test_json_structure();
     // test::test_tree_gen_to_json(false);
+    test::test_mini_upload(); //Test works
 }
