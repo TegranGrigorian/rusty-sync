@@ -615,3 +615,63 @@ impl SyncManager {
         None
     }
 }
+
+/// Utility functions for bucket detection and management
+pub struct BucketManager;
+
+impl BucketManager {
+    /// Try to detect bucket name from folder structure or metadata
+    pub fn detect_bucket_name(folder_path: &str) -> Result<String, String> {
+        // First, check if there's a structure file with bucket info
+        let structure_file = format!("{}/rusty-sync-structure.json", folder_path);
+        if Path::new(&structure_file).exists() {
+            if let Ok(bucket) = Self::read_bucket_from_structure(&structure_file) {
+                return Ok(bucket);
+            }
+        }
+        
+        // Second, check if there's a .rusty-sync-config file in the folder
+        let config_file = format!("{}/.rusty-sync-bucket", folder_path);
+        if Path::new(&config_file).exists() {
+            match std::fs::read_to_string(&config_file) {
+                Ok(bucket) => return Ok(bucket.trim().to_string()),
+                Err(_) => {}
+            }
+        }
+        
+        // Third, try to infer from folder name
+        let folder_name = Path::new(folder_path)
+            .file_name()
+            .and_then(|name| name.to_str())
+            .unwrap_or("")
+            .to_string();
+            
+        if !folder_name.is_empty() && folder_name != "." && folder_name != ".." {
+            return Ok(folder_name);
+        }
+        
+        Err("Could not detect bucket name. Please specify explicitly.".to_string())
+    }
+    
+    /// Save bucket name to folder for future detection
+    pub fn save_bucket_association(folder_path: &str, bucket_name: &str) -> Result<(), String> {
+        let config_file = format!("{}/.rusty-sync-bucket", folder_path);
+        std::fs::write(&config_file, bucket_name)
+            .map_err(|e| format!("Failed to save bucket association: {}", e))
+    }
+    
+    /// Read bucket name from structure file metadata
+    fn read_bucket_from_structure(structure_file: &str) -> Result<String, String> {
+        let file_content = std::fs::read_to_string(structure_file)
+            .map_err(|e| format!("Failed to read structure file: {}", e))?;
+            
+        // Try to parse as JSON and look for bucket metadata
+        if let Ok(json) = serde_json::from_str::<serde_json::Value>(&file_content) {
+            if let Some(bucket) = json.get("bucket_name").and_then(|b| b.as_str()) {
+                return Ok(bucket.to_string());
+            }
+        }
+        
+        Err("No bucket information found in structure file".to_string())
+    }
+}

@@ -12,10 +12,24 @@
       "children": null,
       "git_remote": null,
       "size": 80,
-      "modified": 1756601752,
+      "modified": 1756603205,
       "hash": null,
-      "last_synced": 1756601752,
-      "sync_id": "sync_1756601752",
+      "last_synced": 1756603206,
+      "sync_id": "sync_1756603205",
+      "machine_id": "tegran-grigorian@unknown"
+    },
+    {
+      "name": ".rusty-sync-bucket",
+      "type": "file",
+      "path": "/home/tegran-grigorian/Documents/Projects/rusty-sync/working-clone/.rusty-sync-bucket",
+      "relative_path": ".rusty-sync-bucket",
+      "children": null,
+      "git_remote": null,
+      "size": 13,
+      "modified": 1756603205,
+      "hash": null,
+      "last_synced": 1756603207,
+      "sync_id": "sync_1756603205",
       "machine_id": "tegran-grigorian@unknown"
     },
     {
@@ -26,10 +40,10 @@
       "children": null,
       "git_remote": null,
       "size": 2138,
-      "modified": 1756601493,
+      "modified": 1756601753,
       "hash": null,
       "last_synced": null,
-      "sync_id": "sync_1756601752",
+      "sync_id": "sync_1756603205",
       "machine_id": "tegran-grigorian@unknown"
     },
     {
@@ -65,7 +79,7 @@
   "size": null,
   "modified": null,
   "hash": null,
-  "last_synced": 1756601752,
-  "sync_id": "sync_1756601752",
+  "last_synced": 1756603205,
+  "sync_id": "sync_1756603205",
   "machine_id": "tegran-grigorian@unknown"
 }

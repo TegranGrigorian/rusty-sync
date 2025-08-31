@@ -1,6 +1,7 @@
 // this code reads into the src/core/minio python suite and runs commands into it
 use std::process::Command; // run python script
 use std::path::PathBuf;
+use crate::config::config_manager::RustySyncConfig;
 
 /// Find the project root directory by looking for Cargo.toml
 fn find_project_root() -> Result<PathBuf, String> {
@@ -21,12 +22,21 @@ fn find_project_root() -> Result<PathBuf, String> {
     }
 }
 
+/// Set up environment variables from config before running Python commands
+fn setup_minio_env() -> Result<(), String> {
+    let config = RustySyncConfig::load()?;
+    config.export_to_env()?;
+    Ok(())
+}
+
 pub struct MinioUtil {}
 
 impl MinioUtil {
     // example python command python main.py --upload /home/tegran-grigorian/Documents/Projects/rusty-sync/hi.mp3 rusty-sync hi.mp3
 
     pub fn upload_file(file_path: &str, bucket: &str, object_name: &str) -> Result<(), String> {
+        setup_minio_env()?; // Setup config before running Python
+        
         let project_root = find_project_root()?;
         let minio_dir = project_root.join("src/core/minio");
         let python_exe = minio_dir.join(".venv/bin/python");
@@ -55,6 +65,8 @@ impl MinioUtil {
 
     /// Create a bucket if it doesn't exist
     pub fn create_bucket(bucket: &str) -> Result<(), String> {
+        setup_minio_env()?; // Setup config before running Python
+        
         let project_root = find_project_root()?;
         let minio_dir = project_root.join("src/core/minio");
         let python_exe = minio_dir.join(".venv/bin/python");
@@ -81,6 +93,8 @@ impl MinioUtil {
 
     /// Check if bucket exists
     pub fn check_bucket_exists(bucket: &str) -> Result<bool, String> {
+        setup_minio_env()?; // Setup config before running Python
+        
         let project_root = find_project_root()?;
         let minio_dir = project_root.join("src/core/minio");
         let python_exe = minio_dir.join(".venv/bin/python");
@@ -109,6 +123,8 @@ impl MinioUtil {
 
     /// Download a file from MinIO
     pub fn download_file(bucket: &str, object_name: &str, local_path: &str) -> Result<(), String> {
+        setup_minio_env()?; // Setup config before running Python
+        
         let project_root = find_project_root()?;
         let minio_dir = project_root.join("src/core/minio");
         let python_exe = minio_dir.join(".venv/bin/python");
@@ -137,6 +153,8 @@ impl MinioUtil {
 
     /// List all buckets available on the MinIO server
     pub fn list_buckets() -> Result<Vec<String>, String> {
+        setup_minio_env()?; // Setup config before running Python
+        
         let project_root = find_project_root()?;
         let minio_dir = project_root.join("src/core/minio");
         let python_exe = minio_dir.join(".venv/bin/python");
@@ -185,6 +203,8 @@ impl MinioUtil {
 
     /// List all files in a bucket
     pub fn list_files_in_bucket(bucket: &str) -> Result<Vec<String>, String> {
+        setup_minio_env()?; // Setup config before running Python
+        
         let project_root = find_project_root()?;
         let minio_dir = project_root.join("src/core/minio");
         let python_exe = minio_dir.join(".venv/bin/python");

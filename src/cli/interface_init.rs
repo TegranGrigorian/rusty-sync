@@ -1,6 +1,7 @@
 use crate::sync_test_service::SyncTestService;
-use crate::utils::tree_serializer::{JsonManager, ReadFileTree, SyncManager, FileNode};
+use crate::utils::tree_serializer::{JsonManager, ReadFileTree, SyncManager, FileNode, BucketManager};
 use crate::core::minio_util::MinioUtil;
+use crate::config::config_manager::RustySyncConfig;
 use std::env;
 use std::path::Path;
 use std::process;
@@ -409,20 +410,22 @@ impl InitInterface {
         let args: Vec<String> = env::args().collect();
 
         let (local_folder, bucket) = if args.len() == 2 && args[1] == "pull" {
-            // rusty-sync pull (from current directory)
+            // rusty-sync pull (from current directory - try to auto-detect bucket)
             let current_dir = env::current_dir()
                 .map_err(|e| format!("Failed to get current directory: {}", e))?
                 .to_string_lossy()
                 .to_string();
             
-            // Try to determine bucket from structure file
-            let structure_file = format!("{}/rusty-sync-structure.json", current_dir);
-            if !Path::new(&structure_file).exists() {
-                return Err("Current directory is not initialized for sync. Specify bucket: rusty-sync pull <bucket>".to_string());
+            // Try to auto-detect bucket name
+            match BucketManager::detect_bucket_name(&current_dir) {
+                Ok(bucket) => {
+                    println!("🔍 Auto-detected bucket: '{}'", bucket);
+                    (current_dir, bucket)
+                }
+                Err(_) => {
+                    return Err("Could not auto-detect bucket name. Usage: rusty-sync pull <bucket> [folder]".to_string());
+                }
             }
-
-            // For now, require explicit bucket specification
-            return Err("Usage: rusty-sync pull <bucket> [folder] or rusty-sync pull <bucket>".to_string());
         } else if args.len() == 3 {
             // rusty-sync pull <bucket> (from current directory)
             if args[1] != "pull" {
@@ -441,7 +444,7 @@ impl InitInterface {
             }
             (args[3].clone(), args[2].clone())
         } else {
-            return Err("Usage: rusty-sync pull <bucket> [folder]".to_string());
+            return Err("Usage: rusty-sync pull [bucket] [folder]".to_string());
         };
 
         Self::pull_from_bucket(&local_folder, &bucket)
@@ -452,13 +455,22 @@ impl InitInterface {
         let args: Vec<String> = env::args().collect();
 
         let (local_folder, bucket) = if args.len() == 2 && args[1] == "push" {
-            // rusty-sync push (from current directory)
+            // rusty-sync push (from current directory - try to auto-detect bucket)
             let current_dir = env::current_dir()
                 .map_err(|e| format!("Failed to get current directory: {}", e))?
                 .to_string_lossy()
                 .to_string();
             
-            return Err("Usage: rusty-sync push <bucket> [folder] or rusty-sync push <bucket>".to_string());
+            // Try to auto-detect bucket name
+            match BucketManager::detect_bucket_name(&current_dir) {
+                Ok(bucket) => {
+                    println!("🔍 Auto-detected bucket: '{}'", bucket);
+                    (current_dir, bucket)
+                }
+                Err(_) => {
+                    return Err("Could not auto-detect bucket name. Usage: rusty-sync push <bucket> [folder]".to_string());
+                }
+            }
         } else if args.len() == 3 {
             // rusty-sync push <bucket> (from current directory)
             if args[1] != "push" {
@@ -477,8 +489,14 @@ impl InitInterface {
             }
             (args[3].clone(), args[2].clone())
         } else {
-            return Err("Usage: rusty-sync push <bucket> [folder]".to_string());
+            return Err("Usage: rusty-sync push [bucket] [folder]".to_string());
         };
+
+        // Save bucket association for future auto-detection
+        if let Err(_) = BucketManager::save_bucket_association(&local_folder, &bucket) {
+            // Non-critical error, just warn
+            eprintln!("⚠️  Warning: Could not save bucket association");
+        }
 
         Self::sync_folder(&local_folder, &bucket)
     }
@@ -506,7 +524,7 @@ impl InitInterface {
         Self::show_status(&local_folder)
     }
 
-    /// Handle remote command - list remote buckets
+    /// Handle remote command - list remote buckets or add new bucket
     pub fn handle_remote_command() -> Result<(), String> {
         let args: Vec<String> = env::args().collect();
 
@@ -514,12 +532,41 @@ impl InitInterface {
             if args.len() == 2 || (args.len() == 3 && args[2] == "list") {
                 // rusty-sync remote or rusty-sync remote list
                 Self::list_remote_buckets().map(|_| ())
+            } else if args.len() == 4 && args[2] == "add" {
+                // rusty-sync remote add <bucket-name>
+                let bucket_name = &args[3];
+                Self::create_remote_bucket(bucket_name)
             } else {
-                Err("Usage: rusty-sync remote [list]".to_string())
+                Err("Usage: rusty-sync remote [list] or rusty-sync remote add <bucket-name>".to_string())
             }
         } else {
-            Err("Invalid command. Use 'remote' to list remote buckets".to_string())
+            Err("Invalid command. Use 'remote' to list remote buckets or add new ones".to_string())
         }
+    }
+
+    /// Create a new bucket on the remote server
+    pub fn create_remote_bucket(bucket_name: &str) -> Result<(), String> {
+        println!("🚀 Creating new bucket: '{}'...", bucket_name);
+        
+        // Check if bucket already exists
+        match MinioUtil::check_bucket_exists(bucket_name) {
+            Ok(true) => {
+                println!("⚠️  Bucket '{}' already exists", bucket_name);
+                return Ok(());
+            }
+            Ok(false) => {
+                // Bucket doesn't exist, create it
+                MinioUtil::create_bucket(bucket_name)?;
+                println!("✅ Successfully created bucket: '{}'", bucket_name);
+                Ok(())
+            }
+            Err(e) => Err(format!("Failed to check if bucket exists: {}", e))
+        }
+    }
+
+    /// Handle config command - manage MinIO server configurations
+    pub fn handle_config_command() -> Result<(), String> {
+        RustySyncConfig::interactive_setup()
     }
 
     /// Handle test command
@@ -611,6 +658,13 @@ impl InitInterface {
                 }
             },
             "remote" => match Self::handle_remote_command() {
+                Ok(_) => {},
+                Err(e) => {
+                    eprintln!("❌ Error: {}", e);
+                    process::exit(1);
+                }
+            },
+            "config" => match Self::handle_config_command() {
                 Ok(_) => {},
                 Err(e) => {
                     eprintln!("❌ Error: {}", e);
