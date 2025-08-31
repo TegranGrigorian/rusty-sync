@@ -31,9 +31,24 @@ fn setup_minio_env() -> Result<(), String> {
 
 /// Find MinIO Python scripts - check system installation first, then development location
 fn find_minio_scripts() -> Result<(PathBuf, PathBuf, PathBuf), String> {
-    // System installation path (for deb package)
+    // System installation path - platform specific
+    #[cfg(windows)]
+    let system_minio_dir = {
+        let program_files = std::env::var("PROGRAMFILES")
+            .unwrap_or_else(|_| "C:\\Program Files".to_string());
+        PathBuf::from(program_files).join("RustySync").join("python")
+    };
+    
+    #[cfg(unix)]
     let system_minio_dir = PathBuf::from("/usr/local/share/rusty-sync");
+    
+    // Python executable path - platform specific
+    #[cfg(windows)]
+    let system_python_exe = system_minio_dir.join("Scripts").join("python.exe");
+    
+    #[cfg(unix)]
     let system_python_exe = system_minio_dir.join(".venv/bin/python");
+    
     let system_main_py = system_minio_dir.join("main.py");
     
     if system_minio_dir.exists() && system_main_py.exists() {
@@ -43,14 +58,26 @@ fn find_minio_scripts() -> Result<(PathBuf, PathBuf, PathBuf), String> {
     // Development path (fallback for source builds)
     let project_root = find_project_root()?;
     let dev_minio_dir = project_root.join("src/core/minio");
+    
+    #[cfg(windows)]
+    let dev_python_exe = dev_minio_dir.join("Scripts").join("python.exe");
+    
+    #[cfg(unix)]
     let dev_python_exe = dev_minio_dir.join(".venv/bin/python");
+    
     let dev_main_py = dev_minio_dir.join("main.py");
     
     if dev_minio_dir.exists() && dev_main_py.exists() {
         return Ok((dev_minio_dir, dev_python_exe, dev_main_py));
     }
     
-    Err("Could not find MinIO Python scripts in system (/usr/local/share/rusty-sync) or development (src/core/minio) locations".to_string())
+    #[cfg(windows)]
+    let error_msg = "Could not find MinIO Python scripts in system (Program Files\\RustySync\\python) or development (src/core/minio) locations";
+    
+    #[cfg(unix)]
+    let error_msg = "Could not find MinIO Python scripts in system (/usr/local/share/rusty-sync) or development (src/core/minio) locations";
+    
+    Err(error_msg.to_string())
 }
 
 pub struct MinioUtil {}

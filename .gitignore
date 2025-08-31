@@ -3,3 +3,13 @@
 **/__pycache__/
 rusty-sync
 *.deb
+
+# Windows build artifacts
+installer/
+output/
+*.exe
+*.msi
+
+# Inno Setup temp files
+Setup-Manifest.txt
+Setup-Debug.txt

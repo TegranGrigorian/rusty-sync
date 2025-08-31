@@ -11,8 +11,9 @@ fn main() {
         return;
     }
 
+    //older code
     // Default behavior for testing (when no args provided)
-    println!("Running in test mode...");
+    // println!("Running in test mode...");
     
     // FileManager::create_file("./hello.txt",String::from("Hello, world!").as_str()).unwrap();
 
@@ -32,6 +33,6 @@ fn main() {
     // }
 
     // test::test_json_structure();
-    test::test_tree_gen_to_json(true);
+    // test::test_tree_gen_to_json(true);
     // test::test_mini_upload(); //Test works
 }
