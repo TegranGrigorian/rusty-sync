@@ -1,0 +1,1 @@
+This folder contains the setup wizards, it is hidden so we dont clutter with wizards :)

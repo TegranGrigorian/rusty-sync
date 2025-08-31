@@ -37,11 +37,15 @@ rusty-sync/
 Use the automated build script:
 
 ```bash
-# Simple build
-./build-deb.sh
+# Simple build (from project root)
+./distribution/linux/build-deb.sh
 
 # Build with version bump
-./build-deb.sh --bump-version
+./distribution/linux/build-deb.sh --bump-version
+
+# Or run from the distribution/linux directory
+cd distribution/linux
+./build-deb.sh
 ```
 
 The script will:

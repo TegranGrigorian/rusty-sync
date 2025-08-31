@@ -1,5 +1,31 @@
 /target
 .env
 **/__pycache__/
-rusty-sync
 *.deb
+
+# Debian package build artifacts
+rusty-sync/
+rusty-sync.deb
+
+# Windows build artifacts
+distribution/windows/installer/*
+distribution/windows/output/
+distribution/linux/packages/tar
+*.exe
+*.msi
+
+# Inno Setup temp files
+Setup-Manifest.txt
+Setup-Debug.txt
+
+#hide installer
+installer
+
+#hide vscode
+.vscode
+
+#hide test
+test
+
+# hide examples :)
+examples
