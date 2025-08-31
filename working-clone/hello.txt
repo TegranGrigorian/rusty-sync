@@ -1,0 +1,2 @@
+Hello, world! Modified for sync test.Modified in cloned folder!
+Another change from working-clone!

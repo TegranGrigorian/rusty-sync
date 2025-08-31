@@ -1,4 +1,5 @@
 // use rusty_sync::utils::folder;
+use rusty_sync::cloud::upload_files::FileUpload;
 use rusty_sync::core::minio_util::MinioTests;
 use rusty_sync::utils::git_util::GitDetector;
 use rusty_sync::utils::git_util::GitIgnore;
@@ -68,4 +69,12 @@ pub fn test_tree_gen_to_json(save_in_target: bool) {
 
 pub fn test_mini_upload() {
     MinioTests::test_upload();
+}
+
+pub fn test_upload_from_json() {
+    let file_upload = FileUpload {};
+    let json_path = "";
+    if let Err(e) = file_upload.read_file_tree(json_path) {
+        eprintln!("Error reading file tree from JSON: {}", e);
+    }
 }

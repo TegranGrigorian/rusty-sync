@@ -1,0 +1,71 @@
+{
+  "name": "test",
+  "type": "folder",
+  "path": "/home/tegran-grigorian/Documents/Projects/rusty-sync/test",
+  "relative_path": ".",
+  "children": [
+    {
+      "name": "EXAMPLE.struct_git.json",
+      "type": "file",
+      "path": "/home/tegran-grigorian/Documents/Projects/rusty-sync/test/EXAMPLE.struct_git.json",
+      "relative_path": "EXAMPLE.struct_git.json",
+      "children": null,
+      "git_remote": null,
+      "size": 71,
+      "modified": 1756600158,
+      "hash": null,
+      "last_synced": 1756600159,
+      "sync_id": "sync_1756600158",
+      "machine_id": "tegran-grigorian@unknown"
+    },
+    {
+      "name": "rusty-sync-structure.json",
+      "type": "file",
+      "path": "/home/tegran-grigorian/Documents/Projects/rusty-sync/test/rusty-sync-structure.json",
+      "relative_path": "rusty-sync-structure.json",
+      "children": null,
+      "git_remote": null,
+      "size": 2084,
+      "modified": 1756600157,
+      "hash": null,
+      "last_synced": null,
+      "sync_id": "sync_1756600158",
+      "machine_id": "tegran-grigorian@unknown"
+    },
+    {
+      "name": "hello.txt",
+      "type": "file",
+      "path": "/home/tegran-grigorian/Documents/Projects/rusty-sync/test/hello.txt",
+      "relative_path": "hello.txt",
+      "children": null,
+      "git_remote": null,
+      "size": 37,
+      "modified": 1756600158,
+      "hash": null,
+      "last_synced": 1756600159,
+      "sync_id": "sync_1756600158",
+      "machine_id": "tegran-grigorian@unknown"
+    },
+    {
+      "name": "hi.mp3",
+      "type": "file",
+      "path": "/home/tegran-grigorian/Documents/Projects/rusty-sync/test/hi.mp3",
+      "relative_path": "hi.mp3",
+      "children": null,
+      "git_remote": null,
+      "size": 4258068,
+      "modified": 1755814663,
+      "hash": null,
+      "last_synced": 1756600157,
+      "sync_id": "sync_1756600154",
+      "machine_id": "tegran-grigorian@unknown"
+    }
+  ],
+  "git_remote": null,
+  "size": null,
+  "modified": null,
+  "hash": null,
+  "last_synced": 1756600158,
+  "sync_id": "sync_1756600158",
+  "machine_id": "tegran-grigorian@unknown"
+}
