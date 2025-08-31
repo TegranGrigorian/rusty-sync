@@ -86,6 +86,27 @@ if (Test-Path "src\core\minio\requirements.txt") {
     Write-Host "  - Copied requirements.txt"
 }
 
+# Test Python availability
+Write-Host ""
+Write-Host "Testing Python installation..." -ForegroundColor Yellow
+try {
+    $pythonVersion = py --version 2>$null
+    if ($pythonVersion) {
+        Write-Host "  - Python found: $pythonVersion" -ForegroundColor Green
+    } else {
+        Write-Host "  - Warning: 'py' launcher not found, trying 'python'..." -ForegroundColor Yellow
+        $pythonVersion = python --version 2>$null
+        if ($pythonVersion) {
+            Write-Host "  - Python found: $pythonVersion" -ForegroundColor Green
+        } else {
+            Write-Host "  - Error: Python not found in PATH" -ForegroundColor Red
+            Write-Host "  - Please install Python or add it to PATH" -ForegroundColor Red
+        }
+    }
+} catch {
+    Write-Host "  - Error testing Python: $_" -ForegroundColor Red
+}
+
 Write-Host ""
 Write-Host "Build completed successfully!" -ForegroundColor Green
 Write-Host "Files prepared for installer in: $InstallerDir" -ForegroundColor Yellow
