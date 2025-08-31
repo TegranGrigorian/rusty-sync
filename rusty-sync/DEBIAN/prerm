@@ -1,0 +1,12 @@
+#!/bin/bash
+# prerm script for rusty-sync
+
+set -e
+
+# Clean up Python virtual environment
+if [ -d "/usr/local/share/rusty-sync/.venv" ]; then
+    echo "Cleaning up Python virtual environment..."
+    rm -rf /usr/local/share/rusty-sync/.venv
+fi
+
+exit 0

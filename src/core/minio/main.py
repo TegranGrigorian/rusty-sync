@@ -1,11 +1,10 @@
 import argparse
 import os
-from dotenv import load_dotenv
 from src.minio_util import MinioClient
 
 if __name__ == "__main__":
-    env_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../.env"))
-    load_dotenv(env_path)
+    # Environment variables are now set by the Rust config system
+    # No need for dotenv anymore
 
     parser = argparse.ArgumentParser(description="MinIO Client")
     parser.add_argument("--upload", nargs=3, metavar=("FILE_PATH", "BUCKET", "KEY"), help="Upload a file to MinIO")

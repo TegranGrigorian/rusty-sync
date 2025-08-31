@@ -29,6 +29,30 @@ fn setup_minio_env() -> Result<(), String> {
     Ok(())
 }
 
+/// Find MinIO Python scripts - check system installation first, then development location
+fn find_minio_scripts() -> Result<(PathBuf, PathBuf, PathBuf), String> {
+    // System installation path (for deb package)
+    let system_minio_dir = PathBuf::from("/usr/local/share/rusty-sync");
+    let system_python_exe = system_minio_dir.join(".venv/bin/python");
+    let system_main_py = system_minio_dir.join("main.py");
+    
+    if system_minio_dir.exists() && system_main_py.exists() {
+        return Ok((system_minio_dir, system_python_exe, system_main_py));
+    }
+    
+    // Development path (fallback for source builds)
+    let project_root = find_project_root()?;
+    let dev_minio_dir = project_root.join("src/core/minio");
+    let dev_python_exe = dev_minio_dir.join(".venv/bin/python");
+    let dev_main_py = dev_minio_dir.join("main.py");
+    
+    if dev_minio_dir.exists() && dev_main_py.exists() {
+        return Ok((dev_minio_dir, dev_python_exe, dev_main_py));
+    }
+    
+    Err("Could not find MinIO Python scripts in system (/usr/local/share/rusty-sync) or development (src/core/minio) locations".to_string())
+}
+
 pub struct MinioUtil {}
 
 impl MinioUtil {
@@ -37,10 +61,7 @@ impl MinioUtil {
     pub fn upload_file(file_path: &str, bucket: &str, object_name: &str) -> Result<(), String> {
         setup_minio_env()?; // Setup config before running Python
         
-        let project_root = find_project_root()?;
-        let minio_dir = project_root.join("src/core/minio");
-        let python_exe = minio_dir.join(".venv/bin/python");
-        let main_py = minio_dir.join("main.py");
+        let (minio_dir, python_exe, main_py) = find_minio_scripts()?;
         
         let output = Command::new(&python_exe)
             .current_dir(&minio_dir) // Set working directory
@@ -67,10 +88,7 @@ impl MinioUtil {
     pub fn create_bucket(bucket: &str) -> Result<(), String> {
         setup_minio_env()?; // Setup config before running Python
         
-        let project_root = find_project_root()?;
-        let minio_dir = project_root.join("src/core/minio");
-        let python_exe = minio_dir.join(".venv/bin/python");
-        let main_py = minio_dir.join("main.py");
+        let (minio_dir, python_exe, main_py) = find_minio_scripts()?;
         
         let output = Command::new(&python_exe)
             .current_dir(&minio_dir)
@@ -95,10 +113,7 @@ impl MinioUtil {
     pub fn check_bucket_exists(bucket: &str) -> Result<bool, String> {
         setup_minio_env()?; // Setup config before running Python
         
-        let project_root = find_project_root()?;
-        let minio_dir = project_root.join("src/core/minio");
-        let python_exe = minio_dir.join(".venv/bin/python");
-        let main_py = minio_dir.join("main.py");
+        let (minio_dir, python_exe, main_py) = find_minio_scripts()?;
         
         let output = Command::new(&python_exe)
             .current_dir(&minio_dir)
@@ -125,10 +140,7 @@ impl MinioUtil {
     pub fn download_file(bucket: &str, object_name: &str, local_path: &str) -> Result<(), String> {
         setup_minio_env()?; // Setup config before running Python
         
-        let project_root = find_project_root()?;
-        let minio_dir = project_root.join("src/core/minio");
-        let python_exe = minio_dir.join(".venv/bin/python");
-        let main_py = minio_dir.join("main.py");
+        let (minio_dir, python_exe, main_py) = find_minio_scripts()?;
         
         let output = Command::new(&python_exe)
             .current_dir(&minio_dir)
@@ -155,10 +167,7 @@ impl MinioUtil {
     pub fn list_buckets() -> Result<Vec<String>, String> {
         setup_minio_env()?; // Setup config before running Python
         
-        let project_root = find_project_root()?;
-        let minio_dir = project_root.join("src/core/minio");
-        let python_exe = minio_dir.join(".venv/bin/python");
-        let main_py = minio_dir.join("main.py");
+        let (minio_dir, python_exe, main_py) = find_minio_scripts()?;
         
         let output = Command::new(&python_exe)
             .current_dir(&minio_dir)
@@ -205,10 +214,7 @@ impl MinioUtil {
     pub fn list_files_in_bucket(bucket: &str) -> Result<Vec<String>, String> {
         setup_minio_env()?; // Setup config before running Python
         
-        let project_root = find_project_root()?;
-        let minio_dir = project_root.join("src/core/minio");
-        let python_exe = minio_dir.join(".venv/bin/python");
-        let main_py = minio_dir.join("main.py");
+        let (minio_dir, python_exe, main_py) = find_minio_scripts()?;
         
         let output = Command::new(&python_exe)
             .current_dir(&minio_dir)

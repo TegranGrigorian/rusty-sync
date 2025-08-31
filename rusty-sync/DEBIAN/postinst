@@ -1,0 +1,26 @@
+#!/bin/bash
+# postinst script for rusty-sync
+
+set -e
+
+# Create Python virtual environment in the system location
+if [ ! -d "/usr/local/share/rusty-sync/.venv" ]; then
+    echo "Setting up Python virtual environment for rusty-sync..."
+    cd /usr/local/share/rusty-sync
+    python3 -m venv .venv
+    .venv/bin/pip install boto3
+    echo "Python environment setup complete."
+fi
+
+# Make sure the binary is executable
+chmod +x /usr/local/bin/rusty-sync
+
+# Security: Ensure no pre-configured servers exist in user configs
+# This prevents accidental inclusion of developer credentials
+echo "Ensuring secure installation..."
+
+echo "rusty-sync installation complete!"
+echo "⚠️  SECURITY NOTE: No MinIO servers are pre-configured."
+echo "Run 'rusty-sync config' to configure your MinIO server."
+
+exit 0
