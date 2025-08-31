@@ -10,6 +10,7 @@ rusty-sync.deb
 # Windows build artifacts
 distribution/windows/installer/*
 distribution/windows/output/
+distribution/linux/packages/tar
 *.exe
 *.msi
 
