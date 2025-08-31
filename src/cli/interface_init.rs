@@ -108,7 +108,7 @@ impl InitInterface {
 
     /// Clone (download) a bucket to a local folder - git-like clone command
     pub fn clone_bucket(bucket: &str, local_folder: &str) -> Result<(), String> {
-        println!("🔄 Cloning bucket '{}' to '{}'...", bucket, local_folder);
+        println!(" Cloning bucket '{}' to '{}'...", bucket, local_folder);
 
         // Create local folder if it doesn't exist
         std::fs::create_dir_all(local_folder)
@@ -158,13 +158,13 @@ impl InitInterface {
         // The folder is ready to use - avoid any tree generation that might overwrite files
         let structure_file = format!("{}/rusty-sync-structure.json", local_folder);
         if Path::new(&structure_file).exists() {
-            println!("🔧 Using existing structure file from bucket");
+            println!(" Using existing structure file from bucket");
             println!("� Folder is ready for sync operations");
         } else {
             println!("⚠️  Warning: No structure file found - you may need to run 'rusty-sync status' to initialize properly");
         }
 
-        println!("✅ Successfully cloned bucket '{}' to '{}'", bucket, local_folder);
+        println!(" Successfully cloned bucket '{}' to '{}'", bucket, local_folder);
         Ok(())
     }
 
@@ -215,7 +215,7 @@ impl InitInterface {
                     return Ok(selected);
                 }
                 _ => {
-                    println!("❌ Invalid selection. Please enter a number between 1 and {}", buckets.len());
+                    println!(" Invalid selection. Please enter a number between 1 and {}", buckets.len());
                 }
             }
         }
@@ -283,9 +283,9 @@ impl InitInterface {
             .map_err(|e| format!("Failed to update structure file: {}", e))?;
 
         if downloaded_count > 0 {
-            println!("✅ Downloaded {} new files from bucket '{}'", downloaded_count, bucket);
+            println!(" Downloaded {} new files from bucket '{}'", downloaded_count, bucket);
         } else {
-            println!("✅ Local folder is up to date with bucket '{}'", bucket);
+            println!(" Local folder is up to date with bucket '{}'", bucket);
         }
 
         Ok(())
@@ -298,7 +298,7 @@ impl InitInterface {
         // Check if folder is initialized
         let structure_file = format!("{}/rusty-sync-structure.json", local_folder);
         if !Path::new(&structure_file).exists() {
-            println!("❌ Folder is not initialized for sync");
+            println!(" Folder is not initialized for sync");
             println!("   Run 'rusty-sync init {}' or 'rusty-sync clone <bucket> {}' first", local_folder, local_folder);
             return Ok(());
         }
@@ -319,7 +319,7 @@ impl InitInterface {
         println!("📁 Total files: {}", total_files);
         
         if files_needing_sync.is_empty() {
-            println!("✅ All files are synchronized");
+            println!(" All files are synchronized");
         } else {
             println!("📤 Files that need syncing: {}", files_needing_sync.len());
             for file in &files_needing_sync {
@@ -557,7 +557,7 @@ impl InitInterface {
             Ok(false) => {
                 // Bucket doesn't exist, create it
                 MinioUtil::create_bucket(bucket_name)?;
-                println!("✅ Successfully created bucket: '{}'", bucket_name);
+                println!(" Successfully created bucket: '{}'", bucket_name);
                 Ok(())
             }
             Err(e) => Err(format!("Failed to check if bucket exists: {}", e))
@@ -611,63 +611,63 @@ impl InitInterface {
             "-i" | "--init" => match Self::handle_init_command() {
                 Ok(_) => println!("\n🎉 Initialization completed successfully!"),
                 Err(e) => {
-                    eprintln!("❌ Error: {}", e);
+                    eprintln!(" Error: {}", e);
                     process::exit(1);
                 }
             },
             "-s" | "--sync" => match Self::handle_sync_command() {
                 Ok(_) => println!("\n🎉 Sync completed successfully!"),
                 Err(e) => {
-                    eprintln!("❌ Error: {}", e);
+                    eprintln!(" Error: {}", e);
                     process::exit(1);
                 }
             },
             "-t" | "--test" => match Self::handle_test_command() {
                 Ok(_) => println!("\n🎉 Test completed successfully!"),
                 Err(e) => {
-                    eprintln!("❌ Error: {}", e);
+                    eprintln!(" Error: {}", e);
                     process::exit(1);
                 }
             },
             "clone" => match Self::handle_clone_command() {
                 Ok(_) => println!("\n🎉 Clone completed successfully!"),
                 Err(e) => {
-                    eprintln!("❌ Error: {}", e);
+                    eprintln!(" Error: {}", e);
                     process::exit(1);
                 }
             },
             "pull" => match Self::handle_pull_command() {
                 Ok(_) => println!("\n🎉 Pull completed successfully!"),
                 Err(e) => {
-                    eprintln!("❌ Error: {}", e);
+                    eprintln!(" Error: {}", e);
                     process::exit(1);
                 }
             },
             "push" => match Self::handle_push_command() {
                 Ok(_) => println!("\n🎉 Push completed successfully!"),
                 Err(e) => {
-                    eprintln!("❌ Error: {}", e);
+                    eprintln!(" Error: {}", e);
                     process::exit(1);
                 }
             },
             "status" => match Self::handle_status_command() {
                 Ok(_) => {}, // Status command prints its own success messages
                 Err(e) => {
-                    eprintln!("❌ Error: {}", e);
+                    eprintln!(" Error: {}", e);
                     process::exit(1);
                 }
             },
             "remote" => match Self::handle_remote_command() {
                 Ok(_) => {},
                 Err(e) => {
-                    eprintln!("❌ Error: {}", e);
+                    eprintln!(" Error: {}", e);
                     process::exit(1);
                 }
             },
             "config" => match Self::handle_config_command() {
                 Ok(_) => {},
                 Err(e) => {
-                    eprintln!("❌ Error: {}", e);
+                    eprintln!(" Error: {}", e);
                     process::exit(1);
                 }
             },
@@ -675,7 +675,7 @@ impl InitInterface {
                 print_usage();
             }
             _ => {
-                eprintln!("❌ Unknown command: {}", args[1]);
+                eprintln!(" Unknown command: {}", args[1]);
                 print_usage();
                 process::exit(1);
             }

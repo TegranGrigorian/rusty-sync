@@ -31,13 +31,13 @@ impl SyncTestService {
         // Step 4: Verify cross-platform compatibility
         Self::test_cross_platform_paths(test_folder)?;
 
-        println!("✅ All tests completed successfully!");
+        println!(" All tests completed successfully!");
         Ok(())
     }
 
     /// Ensure the bucket exists, create if necessary
     fn ensure_bucket_exists(bucket: &str) -> Result<(), String> {
-        println!("🔧 Ensuring bucket '{}' exists...", bucket);
+        println!(" Ensuring bucket '{}' exists...", bucket);
         
         match MinioUtil::check_bucket_exists(bucket) {
             Ok(true) => {
@@ -125,7 +125,7 @@ impl SyncTestService {
 
     /// Test 3: Modify file and test incremental sync
     fn test_incremental_sync(test_folder: &str, bucket: &str) -> Result<(), String> {
-        println!("\n🔄 Test 3: Incremental sync (modify file)");
+        println!("\n Test 3: Incremental sync (modify file)");
 
         let test_file = format!("{}/hello.txt", test_folder);
         
@@ -239,7 +239,7 @@ impl SyncTestService {
 
         let sync_file = format!("{}/rusty-sync-structure.json", test_folder);
         if !Path::new(&sync_file).exists() {
-            println!("❌ Folder not initialized for sync");
+            println!(" Folder not initialized for sync");
             return Ok(());
         }
 

@@ -65,10 +65,10 @@ rusty-sync clone photos-2024 .
 ```
 
 **What happens:**
-- ✅ Creates local folder if it doesn't exist
-- ✅ Downloads all files from the bucket
-- ✅ Sets up sync metadata automatically
-- ✅ Ready for immediate use
+-  Creates local folder if it doesn't exist
+-  Downloads all files from the bucket
+-  Sets up sync metadata automatically
+-  Ready for immediate use
 
 ### 3. Check Sync Status
 See what files need to be synchronized:
@@ -85,7 +85,7 @@ rusty-sync status ./my-local-docs
 ```
 📊 Sync status for folder: ./my-local-docs
 📁 Total files: 15
-✅ All files are synchronized
+ All files are synchronized
 
 # OR if changes are detected:
 📤 Files that need syncing: 3
@@ -148,7 +148,7 @@ rusty-sync pull project-files
 
 # 7. Check everything is synced
 rusty-sync status
-# Output: ✅ All files are synchronized
+# Output:  All files are synchronized
 ```
 
 ## 🛠️ Classic Command Workflow
@@ -199,9 +199,9 @@ rusty-sync push my-bucket .
 
 Rusty Sync uses forward slashes for all paths internally, making it compatible across Windows, Linux, and macOS:
 
-- ✅ Automatic path conversion
-- ✅ Relative path storage in metadata
-- ✅ Machine ID tracking for conflict resolution
+-  Automatic path conversion
+-  Relative path storage in metadata
+-  Machine ID tracking for conflict resolution
 
 ### File Change Detection
 
@@ -213,7 +213,7 @@ The system intelligently detects changes using:
 
 Only files that have actually changed are uploaded, making syncs fast and efficient.
 
-## 🔧 Troubleshooting
+##  Troubleshooting
 
 ### Connection Issues
 ```bash
@@ -269,10 +269,10 @@ rusty-sync push my-bucket
 ```
 
 ### 3. Use Descriptive Bucket Names
-- ✅ `project-documents`
-- ✅ `family-photos-2024`
-- ✅ `work-presentations`
-- ❌ `bucket1`, `stuff`, `files`
+-  `project-documents`
+-  `family-photos-2024`
+-  `work-presentations`
+-  `bucket1`, `stuff`, `files`
 
 ### 4. Regular Syncing
 ```bash

@@ -99,7 +99,7 @@ impl RustySyncConfig {
 
     /// Interactive configuration setup
     pub fn interactive_setup() -> Result<(), String> {
-        println!("🔧 Rusty Sync Configuration Setup");
+        println!("Rusty Sync Configuration Setup");
         println!("==================================");
         
         let mut config = Self::load()?;
@@ -134,11 +134,11 @@ impl RustySyncConfig {
                 "1" => {
                     let server_config = Self::prompt_server_config()?;
                     config.add_server(server_config)?;
-                    println!("✅ Server added successfully!");
+                    println!(" Server added successfully!");
                 }
                 "2" => {
                     if config.minio_servers.is_empty() {
-                        println!("❌ No servers configured");
+                        println!(" No servers configured");
                         continue;
                     }
                     
@@ -151,14 +151,14 @@ impl RustySyncConfig {
                     match input.trim().parse::<usize>() {
                         Ok(num) if num >= 1 && num <= config.minio_servers.len() => {
                             config.set_current_server(num - 1)?;
-                            println!("✅ Active server set!");
+                            println!(" Active server set!");
                         }
-                        _ => println!("❌ Invalid server number"),
+                        _ => println!(" Invalid server number"),
                     }
                 }
                 "3" => {
                     if config.minio_servers.is_empty() {
-                        println!("❌ No servers configured");
+                        println!(" No servers configured");
                         continue;
                     }
                     
@@ -178,27 +178,27 @@ impl RustySyncConfig {
                             }
                             
                             config.save()?;
-                            println!("✅ Server removed!");
+                            println!(" Server removed!");
                         }
-                        _ => println!("❌ Invalid server number"),
+                        _ => println!(" Invalid server number"),
                     }
                 }
                 "4" => {
                     match config.get_current_server() {
                         Ok(server) => {
-                            println!("🔄 Testing connection to {}...", server.endpoint_url);
+                            println!("Testing connection to {}...", server.endpoint_url);
                             // We'll implement connection testing later
-                            println!("✅ Connection test would be implemented here");
+                            println!("Connection test would be implemented here");
                         }
-                        Err(e) => println!("❌ {}", e),
+                        Err(e) => println!(" {}", e),
                     }
                 }
                 "5" => {
-                    println!("👋 Configuration saved. Happy syncing!");
+                    println!("Configuration saved. Happy syncing!");
                     break;
                 }
                 _ => {
-                    println!("❌ Invalid option. Please choose 1-5.");
+                    println!("Invalid option. Please choose 1-5.");
                 }
             }
         }
