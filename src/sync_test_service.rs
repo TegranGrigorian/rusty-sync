@@ -11,7 +11,7 @@ pub struct SyncTestService;
 impl SyncTestService {
     /// Complete end-to-end test of the sync system
     pub fn run_complete_test(test_folder: &str, bucket: &str) -> Result<(), String> {
-        println!("🚀 Starting complete sync test...");
+        println!("Starting complete sync test...");
         println!("Test folder: {}", test_folder);
         println!("Target bucket: {}", bucket);
         println!();
@@ -41,17 +41,17 @@ impl SyncTestService {
         
         match MinioUtil::check_bucket_exists(bucket) {
             Ok(true) => {
-                println!("  ✓ Bucket '{}' already exists", bucket);
+                println!("  Bucket '{}' already exists", bucket);
             }
             Ok(false) => {
                 println!("  - Creating bucket '{}'...", bucket);
                 MinioUtil::create_bucket(bucket)?;
-                println!("  ✓ Bucket '{}' created successfully", bucket);
+                println!("  Bucket '{}' created successfully", bucket);
             }
             Err(_) => {
                 println!("  - Cannot verify bucket existence, attempting to create...");
                 MinioUtil::create_bucket(bucket)?;
-                println!("  ✓ Bucket operation completed");
+                println!("  Bucket operation completed");
             }
         }
         
@@ -60,7 +60,7 @@ impl SyncTestService {
 
     /// Test 1: Initialize folder for sync
     fn test_initialization(test_folder: &str) -> Result<(), String> {
-        println!("📁 Test 1: Initializing folder for sync");
+        println!("Test 1: Initializing folder for sync");
         
         // Remove any existing sync file to start fresh
         let sync_file = format!("{}/rusty-sync-structure.json", test_folder);
@@ -81,8 +81,8 @@ impl SyncTestService {
         let file_tree: FileNode = JsonManager::read_from_json(&sync_file)
             .map_err(|e| format!("Failed to read sync file: {}", e))?;
 
-        println!("  ✓ Folder initialized successfully");
-        println!("  ✓ Found {} files", file_tree.get_all_files().len());
+        println!("  Folder initialized successfully");
+        println!("  Found {} files", file_tree.get_all_files().len());
         
         // Display files found
         for file in file_tree.get_all_files() {
@@ -95,12 +95,12 @@ impl SyncTestService {
 
     /// Test 2: Initial sync (upload all files)
     fn test_initial_sync(test_folder: &str, bucket: &str) -> Result<(), String> {
-        println!("\n📤 Test 2: Initial sync (upload all files)");
+        println!("\nTest 2: Initial sync (upload all files)");
 
         // Perform sync
         InitInterface::sync_folder(test_folder, bucket)?;
 
-        println!("  ✓ Initial sync completed");
+        println!("  Initial sync completed");
 
         // Verify sync file was updated
         let sync_file = format!("{}/rusty-sync-structure.json", test_folder);
@@ -117,7 +117,7 @@ impl SyncTestService {
             if file.last_synced.is_none() {
                 return Err(format!("File {} missing sync timestamp", file.name));
             }
-            println!("    ✓ {} synced at timestamp: {:?}", file.name, file.last_synced);
+            println!("    {} synced at timestamp: {:?}", file.name, file.last_synced);
         }
 
         Ok(())
@@ -142,7 +142,7 @@ impl SyncTestService {
         // Perform incremental sync
         InitInterface::sync_folder(test_folder, bucket)?;
 
-        println!("  ✓ Incremental sync completed");
+        println!("  Incremental sync completed");
 
         // Verify the change was detected and synced
         let sync_file = format!("{}/rusty-sync-structure.json", test_folder);
@@ -152,7 +152,7 @@ impl SyncTestService {
         // Find the modified file and check its metadata
         for file in file_tree.get_all_files() {
             if file.name == "hello.txt" {
-                println!("    ✓ Modified file details:");
+                println!("    Modified file details:");
                 println!("      - Size: {:?} bytes", file.size);
                 println!("      - Last modified: {:?}", file.modified);
                 println!("      - Last synced: {:?}", file.last_synced);
@@ -166,7 +166,7 @@ impl SyncTestService {
 
     /// Test 4: Cross-platform path compatibility
     fn test_cross_platform_paths(test_folder: &str) -> Result<(), String> {
-        println!("\n🌐 Test 4: Cross-platform path compatibility");
+        println!("\nTest 4: Cross-platform path compatibility");
 
         let sync_file = format!("{}/rusty-sync-structure.json", test_folder);
         let file_tree: FileNode = JsonManager::read_from_json(&sync_file)
@@ -187,17 +187,17 @@ impl SyncTestService {
                     file.name, file.relative_path));
             }
 
-            println!("    ✓ {} -> {}", file.name, file.relative_path);
+            println!("    {} -> {}", file.name, file.relative_path);
         }
 
-        println!("  ✓ All paths are cross-platform compatible");
+        println!("  All paths are cross-platform compatible");
 
         Ok(())
     }
 
     /// Test the sync detection logic
     pub fn test_sync_detection(test_folder: &str) -> Result<(), String> {
-        println!("\n🔍 Testing sync detection logic");
+        println!("\nTesting sync detection logic");
 
         let sync_file = format!("{}/rusty-sync-structure.json", test_folder);
         if !Path::new(&sync_file).exists() {
@@ -228,13 +228,13 @@ impl SyncTestService {
         fs::write(&file_path, content)
             .map_err(|e| format!("Failed to create test file: {}", e))?;
         
-        println!("✓ Created test file: {}", file_path);
+        println!("Created test file: {}", file_path);
         Ok(())
     }
 
     /// Display current sync status
     pub fn display_sync_status(test_folder: &str) -> Result<(), String> {
-        println!("\n📊 Current Sync Status");
+        println!("\nCurrent Sync Status");
         println!("==================");
 
         let sync_file = format!("{}/rusty-sync-structure.json", test_folder);
@@ -253,7 +253,7 @@ impl SyncTestService {
 
         println!("Files:");
         for file in file_tree.get_all_files() {
-            println!("  📄 {}", file.name);
+            println!("  {}", file.name);
             println!("     Path: {} -> {}", file.path, file.relative_path);
             println!("     Size: {:?} bytes", file.size);
             println!("     Modified: {:?}", file.modified);

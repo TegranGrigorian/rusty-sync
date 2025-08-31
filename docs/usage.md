@@ -4,7 +4,7 @@
 
 Rusty Sync provides git-like commands for seamless file synchronization between your local machine and MinIO cloud storage. Think of it as "Git for your files" with OneDrive-like functionality.
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 1. **MinIO Server** running and accessible
@@ -38,7 +38,7 @@ Rusty Sync supports two command styles:
 - `-t, --test` - Run comprehensive tests
 - `-h, --help` - Show help
 
-## 🎯 Git-like Workflow (Recommended)
+## Git-like Workflow (Recommended)
 
 ### 1. Discover Available Buckets
 ```bash
@@ -46,8 +46,8 @@ rusty-sync remote
 ```
 **Output:**
 ```
-🌐 Discovering available buckets on MinIO server...
-📦 Available buckets:
+Discovering available buckets on MinIO server...
+Available buckets:
   1. my-documents
   2. photos-2024
   3. project-files
@@ -83,15 +83,15 @@ rusty-sync status ./my-local-docs
 
 **Output:**
 ```
-📊 Sync status for folder: ./my-local-docs
-📁 Total files: 15
+Sync status for folder: ./my-local-docs
+Total files: 15
  All files are synchronized
 
 # OR if changes are detected:
-📤 Files that need syncing: 3
-  📄 document.pdf
-  📄 presentation.pptx
-  📄 notes.txt
+Files that need syncing: 3
+  document.pdf
+  presentation.pptx
+  notes.txt
 ```
 
 ### 4. Make Changes and Push
@@ -136,9 +136,9 @@ echo "print('Hello World')" > new-feature/main.py
 
 # 4. Check what needs syncing
 rusty-sync status
-# Output: 📤 Files that need syncing: 2
-#   📄 ideas.txt
-#   📄 new-feature/main.py
+# Output: Files that need syncing: 2
+#   ideas.txt
+#   new-feature/main.py
 
 # 5. Push your changes
 rusty-sync push project-files
@@ -234,7 +234,7 @@ If files seem missing after clone:
 ### Working Directory Issues
 If commands fail with "file not found" errors, ensure you're running from a location where Rusty Sync can find the project root (looks for `Cargo.toml`).
 
-## 📊 File Structure
+## File Structure
 
 When you initialize or clone a folder, Rusty Sync creates:
 
@@ -248,7 +248,7 @@ my-sync-folder/
 - **`rusty-sync-structure.json`**: Contains file metadata, sync timestamps, and machine IDs
 - **`EXAMPLE.struct_git.json`**: Git repository information (if applicable)
 
-## 🎯 Best Practices
+## Best Practices
 
 ### 1. Regular Status Checks
 ```bash

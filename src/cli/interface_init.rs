@@ -34,9 +34,9 @@ impl InitInterface {
         JsonManager::write_to_json(&json_file_path, &file_tree)
             .map_err(|e| format!("Failed to write JSON file: {}", e))?;
 
-        println!("✓ Successfully created structure file: {}", json_file_path);
+        println!("Successfully created structure file: {}", json_file_path);
         println!(
-            "✓ Folder '{}' is now initialized for OneDrive sync",
+            "Folder '{}' is now initialized for OneDrive sync",
             folder_path
         );
         println!("  - Found {} files/folders", count_items(&file_tree));
@@ -86,9 +86,9 @@ impl InitInterface {
         match SyncManager::upload_changed_files(&mut current_tree, bucket) {
             Ok(uploaded_files) => {
                 if uploaded_files.is_empty() {
-                    println!("✓ All files are up to date - nothing to sync");
+                    println!("All files are up to date - nothing to sync");
                 } else {
-                    println!("✓ Successfully uploaded {} files:", uploaded_files.len());
+                    println!("Successfully uploaded {} files:", uploaded_files.len());
                     for file in uploaded_files {
                         println!("  - {}", file);
                     }
@@ -98,7 +98,7 @@ impl InitInterface {
                 JsonManager::write_to_json(&json_file_path, &current_tree)
                     .map_err(|e| format!("Failed to update structure file: {}", e))?;
 
-                println!("✓ Updated structure file: {}", json_file_path);
+                println!("Updated structure file: {}", json_file_path);
             }
             Err(e) => return Err(format!("Sync failed: {}", e)),
         }
@@ -108,7 +108,7 @@ impl InitInterface {
 
     /// Clone (download) a bucket to a local folder - git-like clone command
     pub fn clone_bucket(bucket: &str, local_folder: &str) -> Result<(), String> {
-        println!(" Cloning bucket '{}' to '{}'...", bucket, local_folder);
+        println!("Cloning bucket '{}' to '{}'...", bucket, local_folder);
 
         // Create local folder if it doesn't exist
         std::fs::create_dir_all(local_folder)
@@ -118,11 +118,11 @@ impl InitInterface {
         let files = MinioUtil::list_files_in_bucket(bucket)?;
         
         if files.is_empty() {
-            println!("📁 Bucket '{}' is empty", bucket);
+            println!("Bucket '{}' is empty", bucket);
             return Ok(());
         }
 
-        println!("📥 Downloading {} files from bucket '{}'...", files.len(), bucket);
+        println!("Downloading {} files from bucket '{}'...", files.len(), bucket);
 
         // Download each file
         for file in &files {
@@ -146,7 +146,7 @@ impl InitInterface {
             }
 
             match MinioUtil::download_file(bucket, file, &local_path) {
-                Ok(_) => println!("  ✓ Downloaded: {}", file),
+                Ok(_) => println!("Downloaded: {}", file),
                 Err(e) => {
                     eprintln!("  ✗ Failed to download {}: {}", file, e);
                     return Err(format!("Failed to download {}: {}", file, e));
@@ -154,30 +154,46 @@ impl InitInterface {
             }
         }
 
-        // Since we downloaded the structure file from the bucket, we don't need to re-initialize
-        // The folder is ready to use - avoid any tree generation that might overwrite files
-        let structure_file = format!("{}/rusty-sync-structure.json", local_folder);
-        if Path::new(&structure_file).exists() {
-            println!(" Using existing structure file from bucket");
-            println!("� Folder is ready for sync operations");
+        // Auto-initialize the cloned folder like git - no manual init needed
+        let local_folder_abs = if Path::new(local_folder).is_absolute() {
+            local_folder.to_string()
         } else {
-            println!("⚠️  Warning: No structure file found - you may need to run 'rusty-sync status' to initialize properly");
+            env::current_dir()
+                .map_err(|e| format!("Failed to get current directory: {}", e))?
+                .join(local_folder)
+                .to_string_lossy()
+                .to_string()
+        };
+
+        // Generate structure file for the cloned folder (like git init)
+        let file_tree = ReadFileTree::generate_tree(&local_folder_abs)
+            .map_err(|e| format!("Failed to generate file tree: {}", e))?;
+
+        let structure_file = format!("{}/rusty-sync-structure.json", local_folder_abs);
+        JsonManager::write_to_json(&structure_file, &file_tree)
+            .map_err(|e| format!("Failed to create structure file: {}", e))?;
+
+        // Save bucket association for future operations
+        if let Err(_) = BucketManager::save_bucket_association(&local_folder_abs, bucket) {
+            // Non-critical error, just warn
+            eprintln!("Warning: Could not save bucket association");
         }
 
-        println!(" Successfully cloned bucket '{}' to '{}'", bucket, local_folder);
+        println!("Successfully cloned bucket '{}' to '{}'", bucket, local_folder);
+        println!("Folder is ready for sync operations");
         Ok(())
     }
 
     /// List available buckets on the server - git-like remote list
     pub fn list_remote_buckets() -> Result<Vec<String>, String> {
-        println!("🌐 Discovering available buckets on MinIO server...");
+        println!("Discovering available buckets on MinIO server...");
         
         let buckets = MinioUtil::list_buckets()?;
         
         if buckets.is_empty() {
-            println!("📭 No buckets found on the server");
+            println!("No buckets found on the server");
         } else {
-            println!("📦 Available buckets:");
+            println!("Available buckets:");
             for (i, bucket) in buckets.iter().enumerate() {
                 println!("  {}. {}", i + 1, bucket);
             }
@@ -201,7 +217,7 @@ impl InitInterface {
 
         // Interactive selection
         loop {
-            print!("\n🎯 Select a bucket (1-{}): ", buckets.len());
+            print!("\nSelect a bucket (1-{}): ", buckets.len());
             std::io::stdout().flush().unwrap();
 
             let mut input = String::new();
@@ -223,15 +239,16 @@ impl InitInterface {
 
     /// Pull changes from remote bucket - git-like pull command
     pub fn pull_from_bucket(local_folder: &str, bucket: &str) -> Result<(), String> {
-        println!("⬇️ Pulling changes from bucket '{}' to '{}'...", bucket, local_folder);
+        println!("Pulling changes from bucket '{}' to '{}'...", bucket, local_folder);
 
-        // Check if folder is initialized
+        // Check if folder is initialized, if not auto-initialize (like git)
         let structure_file = format!("{}/rusty-sync-structure.json", local_folder);
-        if !Path::new(&structure_file).exists() {
-            return Err(format!(
-                "Folder '{}' is not initialized for sync. Use 'clone' or 'init' first.",
-                local_folder
-            ));
+        let was_uninitialized = !Path::new(&structure_file).exists();
+        
+        if was_uninitialized {
+            // Create folder if it doesn't exist
+            std::fs::create_dir_all(local_folder)
+                .map_err(|e| format!("Failed to create local folder: {}", e))?;
         }
 
         // Get current local state
@@ -246,15 +263,8 @@ impl InitInterface {
         for remote_file in &remote_files {
             let local_path = format!("{}/{}", local_folder, remote_file);
             
-            // Check if file exists locally
-            let should_download = if Path::new(&local_path).exists() {
-                // File exists - we would need to implement remote timestamp checking
-                // For now, skip existing files (you can enhance this)
-                false
-            } else {
-                // File doesn't exist locally - download it
-                true
-            };
+            // Always download to ensure we have the latest version (simple approach)
+            let should_download = true;
 
             if should_download {
                 // Create parent directories if needed
@@ -265,27 +275,40 @@ impl InitInterface {
 
                 match MinioUtil::download_file(bucket, remote_file, &local_path) {
                     Ok(_) => {
-                        println!("  ✓ Downloaded: {}", remote_file);
+                        println!("Downloaded: {}", remote_file);
                         downloaded_count += 1;
                     }
                     Err(e) => {
-                        eprintln!("  ✗ Failed to download {}: {}", remote_file, e);
+                        eprintln!("Failed to download {}: {}", remote_file, e);
                     }
                 }
             }
         }
 
-        // Update local structure file
-        let updated_tree = ReadFileTree::generate_tree_preserving_sync_data(local_folder)
-            .map_err(|e| format!("Failed to update local structure: {}", e))?;
+        // Update or create structure file (auto-initialize if needed)
+        let updated_tree = if was_uninitialized {
+            // Generate new structure file
+            let tree = ReadFileTree::generate_tree(local_folder)
+                .map_err(|e| format!("Failed to generate file tree: {}", e))?;
+            tree
+        } else {
+            // Update existing structure file
+            ReadFileTree::generate_tree_preserving_sync_data(local_folder)
+                .map_err(|e| format!("Failed to update local structure: {}", e))?
+        };
         
         JsonManager::write_to_json(&structure_file, &updated_tree)
             .map_err(|e| format!("Failed to update structure file: {}", e))?;
 
+        // Save bucket association
+        if let Err(_) = BucketManager::save_bucket_association(local_folder, bucket) {
+            eprintln!("Warning: Could not save bucket association");
+        }
+
         if downloaded_count > 0 {
-            println!(" Downloaded {} new files from bucket '{}'", downloaded_count, bucket);
+            println!("Downloaded {} files from bucket '{}'", downloaded_count, bucket);
         } else {
-            println!(" Local folder is up to date with bucket '{}'", bucket);
+            println!("Local folder is up to date with bucket '{}'", bucket);
         }
 
         Ok(())
@@ -293,7 +316,7 @@ impl InitInterface {
 
     /// Show sync status - git-like status command
     pub fn show_status(local_folder: &str) -> Result<(), String> {
-        println!("📊 Sync status for folder: {}", local_folder);
+        println!("Sync status for folder: {}", local_folder);
 
         // Check if folder is initialized
         let structure_file = format!("{}/rusty-sync-structure.json", local_folder);
@@ -316,14 +339,14 @@ impl InitInterface {
 
         let total_files = file_tree.get_all_files().len();
         
-        println!("📁 Total files: {}", total_files);
+        println!("Total files: {}", total_files);
         
         if files_needing_sync.is_empty() {
             println!(" All files are synchronized");
         } else {
-            println!("📤 Files that need syncing: {}", files_needing_sync.len());
+            println!("Files that need syncing: {}", files_needing_sync.len());
             for file in &files_needing_sync {
-                println!("  📄 {}", file.relative_path);
+                println!("  {}", file.relative_path);
             }
         }
 
@@ -353,6 +376,38 @@ impl InitInterface {
             let current_dir = env::current_dir()
                 .map_err(|e| format!("Failed to get current directory: {}", e))?;
             current_dir.join(folder_path).to_string_lossy().to_string()
+        };
+
+        Self::initialize_folder(&absolute_path)
+    }
+
+    /// Handle init command - initialize a folder for sync (new simplified version)
+    pub fn handle_init_folder_command() -> Result<(), String> {
+        let args: Vec<String> = env::args().collect();
+
+        if args.len() < 3 {
+            return Err("Usage: rusty-sync init <folder_path>".to_string());
+        }
+
+        if args[1] != "init" {
+            return Err("Invalid command. Use 'init' to initialize a folder".to_string());
+        }
+
+        let folder_path = &args[2];
+
+        // Create folder if it doesn't exist
+        std::fs::create_dir_all(folder_path)
+            .map_err(|e| format!("Failed to create folder '{}': {}", folder_path, e))?;
+
+        // Convert to absolute path
+        let absolute_path = if Path::new(folder_path).is_absolute() {
+            folder_path.to_string()
+        } else {
+            env::current_dir()
+                .map_err(|e| format!("Failed to get current directory: {}", e))?
+                .join(folder_path)
+                .to_string_lossy()
+                .to_string()
         };
 
         Self::initialize_folder(&absolute_path)
@@ -391,8 +446,8 @@ impl InitInterface {
     pub fn handle_clone_command() -> Result<(), String> {
         let args: Vec<String> = env::args().collect();
 
-        if args.len() < 4 {
-            return Err("Usage: rusty-sync clone <bucket_name> <local_folder>".to_string());
+        if args.len() < 3 {
+            return Err("Usage: rusty-sync clone <bucket_name> [local_folder]".to_string());
         }
 
         if args[1] != "clone" {
@@ -400,9 +455,14 @@ impl InitInterface {
         }
 
         let bucket = &args[2];
-        let local_folder = &args[3];
+        let local_folder = if args.len() == 4 {
+            args[3].clone()
+        } else {
+            // Clone to current directory with bucket name as folder
+            format!("./{}", bucket)
+        };
 
-        Self::clone_bucket(bucket, local_folder)
+        Self::clone_bucket(bucket, &local_folder)
     }
 
     /// Handle pull command - git-like pull
@@ -419,7 +479,6 @@ impl InitInterface {
             // Try to auto-detect bucket name
             match BucketManager::detect_bucket_name(&current_dir) {
                 Ok(bucket) => {
-                    println!("🔍 Auto-detected bucket: '{}'", bucket);
                     (current_dir, bucket)
                 }
                 Err(_) => {
@@ -464,24 +523,43 @@ impl InitInterface {
             // Try to auto-detect bucket name
             match BucketManager::detect_bucket_name(&current_dir) {
                 Ok(bucket) => {
-                    println!("🔍 Auto-detected bucket: '{}'", bucket);
                     (current_dir, bucket)
                 }
                 Err(_) => {
-                    return Err("Could not auto-detect bucket name. Usage: rusty-sync push <bucket> [folder]".to_string());
+                    return Err("Could not auto-detect bucket name. Usage: rusty-sync push <folder> or rusty-sync push <bucket> [folder]".to_string());
                 }
             }
         } else if args.len() == 3 {
-            // rusty-sync push <bucket> (from current directory)
+            // rusty-sync push <folder> (try to use folder association first, then treat as bucket)
             if args[1] != "push" {
                 return Err("Invalid command. Use 'push' to push changes".to_string());
             }
             
-            let current_dir = env::current_dir()
-                .map_err(|e| format!("Failed to get current directory: {}", e))?
-                .to_string_lossy()
-                .to_string();
-            (current_dir, args[2].clone())
+            let folder_path = &args[2];
+            
+            // Convert to absolute path
+            let absolute_path = if Path::new(folder_path).is_absolute() {
+                folder_path.to_string()
+            } else {
+                env::current_dir()
+                    .map_err(|e| format!("Failed to get current directory: {}", e))?
+                    .join(folder_path)
+                    .to_string_lossy()
+                    .to_string()
+            };
+
+            // Check if this folder has an associated bucket
+            match BucketManager::detect_bucket_name(&absolute_path) {
+                Ok(bucket) => (absolute_path, bucket),
+                Err(_) => {
+                    // Treat the argument as bucket name and use current directory
+                    let current_dir = env::current_dir()
+                        .map_err(|e| format!("Failed to get current directory: {}", e))?
+                        .to_string_lossy()
+                        .to_string();
+                    (current_dir, args[2].clone())
+                }
+            }
         } else if args.len() == 4 {
             // rusty-sync push <bucket> <folder>
             if args[1] != "push" {
@@ -489,13 +567,13 @@ impl InitInterface {
             }
             (args[3].clone(), args[2].clone())
         } else {
-            return Err("Usage: rusty-sync push [bucket] [folder]".to_string());
+            return Err("Usage: rusty-sync push [folder] or rusty-sync push <bucket> [folder]".to_string());
         };
 
         // Save bucket association for future auto-detection
         if let Err(_) = BucketManager::save_bucket_association(&local_folder, &bucket) {
             // Non-critical error, just warn
-            eprintln!("⚠️  Warning: Could not save bucket association");
+            eprintln!(" Warning: Could not save bucket association");
         }
 
         Self::sync_folder(&local_folder, &bucket)
@@ -532,26 +610,55 @@ impl InitInterface {
             if args.len() == 2 || (args.len() == 3 && args[2] == "list") {
                 // rusty-sync remote or rusty-sync remote list
                 Self::list_remote_buckets().map(|_| ())
-            } else if args.len() == 4 && args[2] == "add" {
-                // rusty-sync remote add <bucket-name>
-                let bucket_name = &args[3];
-                Self::create_remote_bucket(bucket_name)
+            } else if args.len() == 5 && args[2] == "add" {
+                // rusty-sync remote add <folder> <bucket-name>
+                let folder_path = &args[3];
+                let bucket_name = &args[4];
+                Self::add_remote_association(folder_path, bucket_name)
             } else {
-                Err("Usage: rusty-sync remote [list] or rusty-sync remote add <bucket-name>".to_string())
+                Err("Usage: rusty-sync remote [list] or rusty-sync remote add <folder> <bucket-name>".to_string())
             }
         } else {
             Err("Invalid command. Use 'remote' to list remote buckets or add new ones".to_string())
         }
     }
 
+    /// Add remote association between folder and bucket
+    pub fn add_remote_association(folder_path: &str, bucket_name: &str) -> Result<(), String> {
+        // Convert to absolute path
+        let absolute_path = if Path::new(folder_path).is_absolute() {
+            folder_path.to_string()
+        } else {
+            env::current_dir()
+                .map_err(|e| format!("Failed to get current directory: {}", e))?
+                .join(folder_path)
+                .to_string_lossy()
+                .to_string()
+        };
+
+        // Check if folder exists
+        if !Path::new(&absolute_path).exists() {
+            return Err(format!("Folder '{}' does not exist", absolute_path));
+        }
+
+        // Create bucket if it doesn't exist
+        Self::create_remote_bucket(bucket_name)?;
+
+        // Save the association
+        BucketManager::save_bucket_association(&absolute_path, bucket_name)?;
+
+        println!("Associated folder '{}' with bucket '{}'", absolute_path, bucket_name);
+        Ok(())
+    }
+
     /// Create a new bucket on the remote server
     pub fn create_remote_bucket(bucket_name: &str) -> Result<(), String> {
-        println!("🚀 Creating new bucket: '{}'...", bucket_name);
+        println!("Creating new bucket: '{}'...", bucket_name);
         
         // Check if bucket already exists
         match MinioUtil::check_bucket_exists(bucket_name) {
             Ok(true) => {
-                println!("⚠️  Bucket '{}' already exists", bucket_name);
+                println!(" Bucket '{}' already exists", bucket_name);
                 return Ok(());
             }
             Ok(false) => {
@@ -608,43 +715,50 @@ impl InitInterface {
         }
 
         match args[1].as_str() {
+            "init" => match Self::handle_init_folder_command() {
+                Ok(_) => println!("Initialization completed successfully!"),
+                Err(e) => {
+                    eprintln!("Error: {}", e);
+                    process::exit(1);
+                }
+            },
             "-i" | "--init" => match Self::handle_init_command() {
-                Ok(_) => println!("\n🎉 Initialization completed successfully!"),
+                Ok(_) => println!("\nInitialization completed successfully!"),
                 Err(e) => {
                     eprintln!(" Error: {}", e);
                     process::exit(1);
                 }
             },
             "-s" | "--sync" => match Self::handle_sync_command() {
-                Ok(_) => println!("\n🎉 Sync completed successfully!"),
+                Ok(_) => println!("\nSync completed successfully!"),
                 Err(e) => {
                     eprintln!(" Error: {}", e);
                     process::exit(1);
                 }
             },
             "-t" | "--test" => match Self::handle_test_command() {
-                Ok(_) => println!("\n🎉 Test completed successfully!"),
+                Ok(_) => println!("\nTest completed successfully!"),
                 Err(e) => {
                     eprintln!(" Error: {}", e);
                     process::exit(1);
                 }
             },
             "clone" => match Self::handle_clone_command() {
-                Ok(_) => println!("\n🎉 Clone completed successfully!"),
+                Ok(_) => println!("\nClone completed successfully!"),
                 Err(e) => {
                     eprintln!(" Error: {}", e);
                     process::exit(1);
                 }
             },
             "pull" => match Self::handle_pull_command() {
-                Ok(_) => println!("\n🎉 Pull completed successfully!"),
+                Ok(_) => println!("\nPull completed successfully!"),
                 Err(e) => {
                     eprintln!(" Error: {}", e);
                     process::exit(1);
                 }
             },
             "push" => match Self::handle_push_command() {
-                Ok(_) => println!("\n🎉 Push completed successfully!"),
+                Ok(_) => println!("\nPush completed successfully!"),
                 Err(e) => {
                     eprintln!(" Error: {}", e);
                     process::exit(1);
@@ -704,6 +818,13 @@ fn print_usage() {
     println!("    rusty-sync <COMMAND> [OPTIONS]");
     println!();
     println!("COMMANDS:");
+    println!("  Simple Commands:");
+    println!("    init <folder>               Initialize a folder for sync");
+    println!("    remote add <folder> <bucket> Associate folder with bucket");
+    println!("    push [folder]               Push folder to associated bucket");
+    println!("    pull                        Pull changes from associated bucket");
+    println!("    clone <bucket>              Clone bucket to current directory");
+    println!();
     println!("  Git-like Commands:");
     println!("    clone <bucket> <folder>     Clone a bucket to local folder");
     println!("    pull <bucket> [folder]      Pull changes from bucket to local folder");
@@ -718,6 +839,17 @@ fn print_usage() {
     println!("    -h, --help                  Show this help message");
     println!();
     println!("EXAMPLES:");
+    println!("  Simple workflow:");
+    println!("    rusty-sync init hello           # Initialize hello folder");
+    println!("    rusty-sync remote add hello/ hello  # Associate folder with bucket");
+    println!("    rusty-sync push hello           # Push folder to bucket");
+    println!("    echo 'test' > hello/test.txt    # Create new file");
+    println!("    rusty-sync push                 # Push changes (auto-detects)");
+    println!("    cd /tmp && mkdir recreate && cd recreate");
+    println!("    rusty-sync clone hello          # Clone bucket");
+    println!("    # ... edit files ...");
+    println!("    rusty-sync push                 # Push changes back");
+    println!();
     println!("  Git-like workflow:");
     println!("    rusty-sync remote           # List available buckets");
     println!("    rusty-sync clone my-bucket ./sync-folder");
@@ -727,34 +859,6 @@ fn print_usage() {
     println!("    rusty-sync push my-bucket   # Upload changes");
     println!("    rusty-sync pull my-bucket   # Download remote changes");
     println!();
-    println!("  Classic workflow:");
-    println!("    rusty-sync -i /home/user/Documents");
-    println!("    rusty-sync -s /home/user/Documents my-bucket");
-    println!("    rusty-sync -t ./test my-bucket");
-    println!();
-    println!("DESCRIPTION:");
-    println!("    Rusty Sync provides OneDrive-like synchronization with MinIO storage.");
-    println!("    Use git-like commands for familiar workflow, or classic flags for scripts.");
-    println!();
-    println!("    The git-like commands work similarly to Git:");
-    println!("    • clone: Download entire bucket to local folder");
-    println!("    • pull: Download new/changed files from bucket");
-    println!("    • push: Upload local changes to bucket");
-    println!("    • status: Show what files need syncing");
-    println!("    • remote: List available buckets");
-    println!();
-    println!("DESCRIPTION:");
-    println!("    The initialization process will:");
-    println!("    • Scan the specified folder and all its contents");
-    println!("    • Create a JSON structure file for tracking changes");
-    println!("    • Prepare the folder for cloud synchronization");
-    println!("    • Generate metadata for all files (size, modification time)");
-    println!();
-    println!("    The sync process will:");
-    println!("    • Compare local files with the last sync state");
-    println!("    • Upload changed files to the MinIO bucket");
-    println!("    • Use relative paths for cross-platform compatibility");
-    println!("    • Track machine IDs for conflict resolution");
 }
 
 #[cfg(test)]

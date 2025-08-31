@@ -463,7 +463,7 @@ impl SyncManager {
             if let Some(file) = Self::find_file_by_relative_path(file_tree, &relative_path) {
                 match Self::upload_file_to_minio(file, bucket) {
                     Ok(_) => {
-                        println!("✓ Uploaded: {}", relative_path);
+                        println!("Uploaded: {}", relative_path);
                         // Mark file as synced after successful upload
                         Self::mark_file_as_synced(file_tree, &relative_path)?;
                         uploaded_files.push(relative_path);
@@ -577,7 +577,7 @@ impl SyncManager {
                     if let Some(file) = Self::find_file_by_relative_path(local_tree, &relative_path)
                     {
                         Self::upload_file_to_minio(file, bucket)?;
-                        println!("✓ Uploaded: {}", relative_path);
+                        println!("Uploaded: {}", relative_path);
                     }
                 }
                 SyncAction::Download => {
