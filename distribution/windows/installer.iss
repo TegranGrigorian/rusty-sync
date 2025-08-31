@@ -18,7 +18,7 @@ WizardImageFile=wizard-large.bmp
 WizardSmallImageFile=wizard-small.bmp
 ArchitecturesInstallIn64BitMode=x64
 MinVersion=6.1sp1
-LicenseFile=LICENSE
+LicenseFile=..\..\LICENSE
 InfoBeforeFile=INSTALL_INFO.txt
 
 [Languages]
@@ -37,8 +37,8 @@ Source: "installer\bin\rusty-sync.exe"; DestDir: "{app}\bin"; Flags: ignoreversi
 Source: "installer\python\*"; DestDir: "{app}\python"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 ; Documentation
-Source: "README.md"; DestDir: "{app}"; DestName: "README.txt"; Flags: ignoreversion isreadme
-Source: "docs\*"; DestDir: "{app}\docs"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist
+Source: "..\..\README.md"; DestDir: "{app}"; DestName: "README.txt"; Flags: ignoreversion isreadme
+Source: "..\..\docs\*"; DestDir: "{app}\docs"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist
 
 [Icons]
 Name: "{group}\RustySync"; Filename: "{app}\bin\rusty-sync.exe"

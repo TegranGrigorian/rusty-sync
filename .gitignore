@@ -5,8 +5,8 @@ rusty-sync
 *.deb
 
 # Windows build artifacts
-installer/
-output/
+distribution/windows/installer/
+distribution/windows/output/
 *.exe
 *.msi
 

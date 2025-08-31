@@ -1,6 +1,6 @@
 # RustySync
 
-A cross-platform file synchronization tool built in Rust with MinIO backend support.
+I hate onedrive. A cross-platform file synchronization tool built in Rust with MinIO backend support.
 
 ## Features
 
@@ -76,11 +76,14 @@ RustySync stores configuration in:
 # Install Rust with MSVC toolchain
 rustup target add x86_64-pc-windows-msvc
 
-# Build
-.\build-windows.ps1 -Release
+# Option 1: Use launcher script (recommended)
+.\run-windows-build.ps1 -Release
+
+# Option 2: Use build script directly
+.\distribution\windows\build-windows.ps1 -Release
 
 # Create installer (requires Inno Setup)
-"C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
+& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "distribution\windows\installer.iss"
 ```
 
 ### Linux

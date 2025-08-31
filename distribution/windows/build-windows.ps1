@@ -8,16 +8,30 @@ if ($Help) {
     Write-Host "Usage: .\build-windows.ps1 [-Release] [-Help]"
     Write-Host "  -Release: Build in release mode (optimized)"
     Write-Host "  -Help:    Show this help message"
+    Write-Host ""
+    Write-Host "Note: This script should be run from the project root directory,"
+    Write-Host "      not from the distribution/windows/ folder."
     exit 0
 }
 
 Write-Host "Building rusty-sync for Windows..." -ForegroundColor Green
 
+# Navigate to project root if we're in the distribution/windows folder
+$currentDir = Get-Location
+if ($currentDir.Path -like "*distribution*windows*") {
+    Write-Host "Detected running from distribution/windows folder, navigating to project root..." -ForegroundColor Yellow
+    Set-Location "..\.."
+}
+
 # Check if we're in the right directory
 if (-not (Test-Path "Cargo.toml")) {
-    Write-Error "Error: Run this script from the rusty-sync project root directory"
+    Write-Error "Error: Cannot find Cargo.toml. Please run this script from the rusty-sync project root directory"
+    Write-Error "Current directory: $(Get-Location)"
     exit 1
 }
+
+$projectRoot = Get-Location
+Write-Host "Project root: $projectRoot" -ForegroundColor Gray
 
 # Determine build mode
 $BuildMode = if ($Release) { "release" } else { "debug" }
@@ -47,7 +61,7 @@ if (-not (Test-Path $BinaryPath)) {
 
 # Step 2: Prepare installer directory structure
 Write-Host "Step 2: Preparing installer directory structure..." -ForegroundColor Cyan
-$InstallerDir = ".\installer"
+$InstallerDir = ".\distribution\windows\installer"
 $BinDir = "$InstallerDir\bin"
 $PythonDir = "$InstallerDir\python"
 $PythonSrcDir = "$PythonDir\src"
@@ -113,6 +127,7 @@ Write-Host "Files prepared for installer in: $InstallerDir" -ForegroundColor Yel
 Write-Host ""
 Write-Host "Next steps:" -ForegroundColor White
 Write-Host "1. Install Python dependencies in the installer directory"
-Write-Host "2. Run Inno Setup with installer.iss to create the Windows installer"
+Write-Host "2. Run Inno Setup with distribution\windows\installer.iss to create the Windows installer"
+Write-Host "3. Use: cd distribution\windows && .\setup-windows.ps1 -SkipPrerequisites"
 Write-Host ""
 Write-Host "Binary size: $((Get-Item $BinaryPath).Length / 1MB) MB" -ForegroundColor Gray

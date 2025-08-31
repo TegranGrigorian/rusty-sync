@@ -9,10 +9,30 @@ if ($Help) {
     Write-Host "Usage: .\setup-windows.ps1 [-SkipPrerequisites] [-Help]"
     Write-Host "  -SkipPrerequisites: Skip installation of Rust, Python, etc."
     Write-Host "  -Help: Show this help message"
+    Write-Host ""
+    Write-Host "Note: This script should be run from the project root directory."
+    Write-Host "      It will automatically navigate if run from distribution/windows/"
     exit 0
 }
 
 Write-Host "=== RustySync Windows Setup ===" -ForegroundColor Green
+
+# Navigate to project root if we're in the distribution/windows folder
+$currentDir = Get-Location
+if ($currentDir.Path -like "*distribution*windows*") {
+    Write-Host "Detected running from distribution/windows folder, navigating to project root..." -ForegroundColor Yellow
+    Set-Location "..\.."
+}
+
+# Verify we're in the project root
+if (-not (Test-Path "Cargo.toml")) {
+    Write-Error "Error: Cannot find Cargo.toml. Please run this script from the rusty-sync project root directory"
+    Write-Error "Current directory: $(Get-Location)"
+    exit 1
+}
+
+$projectRoot = Get-Location
+Write-Host "Project root: $projectRoot" -ForegroundColor Gray
 
 # Phase 1: Prerequisites
 if (-not $SkipPrerequisites) {
@@ -78,7 +98,7 @@ if (Test-Path "src\core\minio") {
 
 # Phase 4: Build application
 Write-Host "`n4. Building application..." -ForegroundColor Cyan
-.\build-windows.ps1 -Release
+& "distribution\windows\build-windows.ps1" -Release
 
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Build failed!"
@@ -87,8 +107,8 @@ if ($LASTEXITCODE -ne 0) {
 
 # Phase 5: Set up installer Python environment
 Write-Host "`n5. Setting up installer Python environment..." -ForegroundColor Cyan
-if (Test-Path "installer\python") {
-    Push-Location "installer\python"
+if (Test-Path "distribution\windows\installer\python") {
+    Push-Location "distribution\windows\installer\python"
     
     & $pythonCmd -m venv .
     .\Scripts\Activate.ps1
@@ -103,12 +123,12 @@ if (Test-Path "installer\python") {
 Write-Host "`n6. Creating installer..." -ForegroundColor Cyan
 $InnoSetupPath = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
 if (Test-Path $InnoSetupPath) {
-    & $InnoSetupPath "installer.iss"
+    & $InnoSetupPath "distribution\windows\installer.iss"
     
-    if (Test-Path "output\RustySync-Setup-0.1.0.exe") {
+    if (Test-Path "distribution\windows\output\RustySync-Setup-0.1.0.exe") {
         Write-Host "`n=== SUCCESS! ===" -ForegroundColor Green
-        Write-Host "Installer created: output\RustySync-Setup-0.1.0.exe" -ForegroundColor Green
-        Write-Host "File size: $((Get-Item "output\RustySync-Setup-0.1.0.exe").Length / 1MB) MB" -ForegroundColor Gray
+        Write-Host "Installer created: distribution\windows\output\RustySync-Setup-0.1.0.exe" -ForegroundColor Green
+        Write-Host "File size: $((Get-Item "distribution\windows\output\RustySync-Setup-0.1.0.exe").Length / 1MB) MB" -ForegroundColor Gray
     } else {
         Write-Error "Installer creation failed!"
     }
